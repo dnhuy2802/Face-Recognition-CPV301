@@ -2,6 +2,7 @@ import { Card, Typography, Space, Button, Popover } from "antd";
 import { MoreOutlined, PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import Flex from "./Flex";
 import Spacer from "./Spacer";
+import { appStrings } from "../utils/appStrings";
 
 function FaceCard({ id, imgUrl, name }) {
   return (
@@ -13,11 +14,13 @@ function FaceCard({ id, imgUrl, name }) {
         </Space>
         <Popover
           content={
-            <Flex direction="column">
-              <Button icon={<PlusOutlined />}>Add More Images</Button>
+            <Flex direction="column" align="stretch">
+              <Button icon={<PlusOutlined />}>
+                {appStrings.upload.faceCardAddMoreButton}
+              </Button>
               <Spacer size={5} />
               <Button danger icon={<DeleteOutlined />}>
-                Delete
+                {appStrings.upload.faceCardDeleteButton}
               </Button>
             </Flex>
           }

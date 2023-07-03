@@ -8,6 +8,8 @@ export const initialState = {
   isLoading: false,
   /// Sidebar
   selectedSidebarItem: sidebarOptions[0].key,
+  /// Camera
+  devideId: null,
 };
 
 export const StateContext = createContext();

@@ -1,7 +1,11 @@
-function Flex({ children, direction, align, justify }) {
+function Flex({
+  children,
+  direction = "row",
+  align = "start",
+  justify = "start",
+}) {
   const flexStyle = {
     display: "flex",
-    flexWrap: "wrap",
     flexDirection: direction,
     alignItems: align,
     justifyContent: justify,
