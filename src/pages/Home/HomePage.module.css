@@ -1,0 +1,25 @@
+.wrapper {
+    min-height: 100vh;
+}
+
+.headerTitle {
+    color: var(--text-light);
+    font-size: 1.3rem;
+    font-weight: 600;
+    background-color: var(--color-dark);
+    display: flex;
+    align-items: center;
+}
+
+.container {
+    background-color: var(--color-ceramic);
+    height: 100%;
+}
+
+.sidebarContainer {
+    background-color: var(--color-white) !important;
+}
+
+.content {
+    padding: 1.2rem;
+}

@@ -11,6 +11,8 @@
   --color-dark: rgb(29, 53, 87);
   --color-neutral: rgb(168, 218, 220);
   --color-light: rgb(241, 250, 238);
+  --color-white: rgb(255, 255, 255);
+  --color-ceramic: rgb(242, 242, 242);
   /* Text */
   --text-light: rgb(230, 230, 230);
   --text-black: rgb(20, 20, 20);
@@ -21,4 +23,9 @@
   --status-error: rgb(229, 56, 59);
   --status-warning: rgb(255, 204, 0);
   --status-info: rgb(0, 122, 255);
+}
+
+/* Global */
+html {
+  font-size: 14px;
 }

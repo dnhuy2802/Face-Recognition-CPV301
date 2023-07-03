@@ -20,3 +20,7 @@ export function debugLogger(message, type) {
     }
   }
 }
+
+export function convertLowerCase(string) {
+  return string.toLowerCase();
+}
