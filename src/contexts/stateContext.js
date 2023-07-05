@@ -10,6 +10,9 @@ export const initialState = {
   selectedSidebarItem: sidebarOptions[0].key,
   /// Camera
   devideId: null,
+  images: [],
+  /// Upload
+  uploadName: "",
 };
 
 export const StateContext = createContext();

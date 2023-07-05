@@ -1,7 +1,8 @@
 import style from "./UploadScreen.module.css";
-import { useState, useMemo, useRef } from "react";
-import { Space, Button, Typography, Modal, Input, Empty } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { useState, useMemo, useRef, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Space, Button, Typography, Modal, Input, Empty, Progress } from "antd";
+import { SearchOutlined, CloudUploadOutlined } from "@ant-design/icons";
 import { AiFillCamera } from "react-icons/ai";
 import { appStrings } from "../../../utils/appStrings";
 import Spacer from "../../../components/Spacer";
@@ -10,12 +11,22 @@ import FaceCard from "../../../components/FaceCard";
 import Camera from "../../../components/Camera";
 import { MOCK_DATA } from "../../../utils/mockData";
 import useProviderState from "../../../hooks/useProviderState";
-import { initialState } from "../../../contexts/nameInputContext";
+import { initialState, InputContext } from "../../../contexts/nameInputContext";
 import Flex from "../../../components/Flex";
 import { convertLowerCase, trimString } from "../../../utils/utilities";
 import DebouncedInput from "../../../components/DebouncedInput";
+import { StateContext } from "../../../contexts/stateContext";
+import {
+  uploadImages,
+  getFaces,
+  deleteFace,
+} from "../../../apis/uploadService";
+import { BASE64_PREFIX } from "../../../utils/constants";
 
 function UploadScreen() {
+  // Navigation
+  const navigator = useNavigate();
+
   // Searching
   const [searchValue, setSearchValue] = useState("");
 
@@ -32,6 +43,16 @@ function UploadScreen() {
   // Modal
   const [isModalVisible, setIsModalVisible] = useState(false);
 
+  // Images
+  const { store: globalStore } = useContext(StateContext);
+  const images = globalStore((state) => state.images);
+  const setImages = globalStore((state) => state.setImages);
+  const uploadName = globalStore((state) => state.uploadName);
+  const setUploadName = globalStore((state) => state.setUploadName);
+
+  // Faces
+  const [faces, setFaces] = useState([]);
+
   // Toggle modal handler
   const toggleModal = () => setIsModalVisible((prev) => !prev);
 
@@ -45,7 +66,7 @@ function UploadScreen() {
       return;
     }
     // Check if input is duplicate
-    if (MOCK_DATA.find((item) => item.name === _inputValue)) {
+    if (faces.find((item) => item.name === _inputValue)) {
       _setError(true);
       _setErrorMessage(appStrings.upload.modalNameInputDuplicateError);
       return;
@@ -70,14 +91,73 @@ function UploadScreen() {
       inputRef.current.focus();
     } else {
       // Navigate to capture screen
+      navigator("/capture", { state: { name: _value } });
+      // Set upload name
+      setUploadName(_value);
       toggleModal();
     }
   }
 
+  function onDeleteFace(name) {
+    deleteFace(name).then(() => {
+      getFaces().then((res) => setFaces(res));
+    });
+  }
+
+  // Get Upload Content. If have images, start upload
+  function getUploadContent() {
+    if (images.length === 0) {
+      return (
+        <Button
+          type="dashed"
+          className={style.captureButton}
+          onClick={toggleModal}
+        >
+          <Space direction="vertical" size={1}>
+            <AiFillCamera size={24} />
+            {appStrings.upload.captureButton}
+          </Space>
+        </Button>
+      );
+    } else {
+      return (
+        <Button type="dashed" className={style.captureButton}>
+          <Flex direction="column" align="center">
+            <Space direction="horizontal" size={10}>
+              <CloudUploadOutlined />
+              {appStrings.upload.uploadingTitle}
+              <Typography.Text type="secondary">60%</Typography.Text>
+            </Space>
+            <Progress
+              percent={60}
+              status="active"
+              showInfo={false}
+              size="small"
+              strokeColor={{
+                "0%": "var(--color-secondary)",
+                "100%": "var(--color-primary)",
+              }}
+              className={style.uploadProgress}
+            />
+          </Flex>
+        </Button>
+      );
+    }
+  }
+
+  useEffect(() => {
+    // If have images, start upload
+    if (images.length > 0) {
+      uploadImages(uploadName, images).then(() => setImages([]));
+    }
+    // Fetch faces
+    getFaces().then((res) => setFaces(res));
+  }, [images]);
+
   // Get face cards
   function getFaceCards() {
     // Filter data based on search value
-    const _data = MOCK_DATA.filter((item) =>
+    const _data = faces.filter((item) =>
       convertLowerCase(item.name).includes(
         trimString(convertLowerCase(searchValue))
       )
@@ -98,8 +178,9 @@ function UploadScreen() {
             <FaceCard
               key={item.id}
               id={item.id}
-              imgUrl={item.imgUrl}
+              imgUrl={`${BASE64_PREFIX}${item.thumbnail}`}
               name={item.name}
+              onDelete={() => onDeleteFace(item.name)}
             />
           ))}
         </Grid>
@@ -108,18 +189,9 @@ function UploadScreen() {
   }
 
   return (
-    <>
+    <InputContext.Provider value={{ store: store }}>
       <Space direction="vertical" block className={style.container}>
-        <Button
-          type="dashed"
-          className={style.captureButton}
-          onClick={toggleModal}
-        >
-          <Space direction="vertical" size={1}>
-            <AiFillCamera size={24} />
-            {appStrings.upload.captureButton}
-          </Space>
-        </Button>
+        {getUploadContent()}
         <Spacer size={10} />
         <Flex justify="space-between" direction="row">
           <div>
@@ -168,7 +240,7 @@ function UploadScreen() {
         <Spacer size={10} />
         <Camera />
       </Modal>
-    </>
+    </InputContext.Provider>
   );
 }
 

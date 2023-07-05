@@ -26,6 +26,8 @@ export const appStrings = {
     modalNameInputPlaceholder: "Your name",
     modalNameInputEmptyError: "Name must not be empty",
     modalNameInputDuplicateError: "Name already exists",
+    captureButton: "Capture",
+    uploadingTitle: "Uploading Images",
   },
   // Camera
   camera: {

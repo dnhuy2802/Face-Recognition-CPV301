@@ -8,12 +8,17 @@ import { debugLogger } from "./utilities";
 const apiInstance = axios.create({
   baseURL: "http://127.0.0.1:5000",
   timeout: 1000,
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
 });
 
 /// GET method
-export function getMethod(url, config) {
+export async function getMethod(url, config) {
   try {
-    return apiInstance.get(url, config);
+    const response = await apiInstance.get(url, config);
+    return response.data;
   } catch (error) {
     debugLogger(error, "error");
     throw new Error(error);
@@ -21,9 +26,10 @@ export function getMethod(url, config) {
 }
 
 /// POST method
-export function postMethod(url, data, config) {
+export async function postMethod(url, data, config) {
   try {
-    return apiInstance.post(url, data, config);
+    const response = await apiInstance.post(url, data, config);
+    return response.data;
   } catch (error) {
     debugLogger(error, "error");
     throw new Error(error);
@@ -31,9 +37,10 @@ export function postMethod(url, data, config) {
 }
 
 /// PUT method
-export function putMethod(url, data, config) {
+export async function putMethod(url, data, config) {
   try {
-    return apiInstance.put(url, data, config);
+    const response = await apiInstance.put(url, data, config);
+    return response.data;
   } catch (error) {
     debugLogger(error, "error");
     throw new Error(error);
@@ -41,9 +48,10 @@ export function putMethod(url, data, config) {
 }
 
 /// DELETE method
-export function deleteMethod(url, config) {
+export async function deleteMethod(url, config) {
   try {
-    return apiInstance.delete(url, config);
+    const response = await apiInstance.delete(url, config);
+    return response.data;
   } catch (error) {
     debugLogger(error, "error");
     throw new Error(error);

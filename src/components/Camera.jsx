@@ -6,9 +6,12 @@ import { StateContext } from "../contexts/stateContext";
 import { Typography } from "antd";
 import { appStrings } from "../utils/appStrings";
 
-function Camera({ isMirror = true, showSelectDevice = true }) {
+function Camera({
+  isMirror = true,
+  showSelectDevice = true,
+  mediaCallback = () => {},
+}) {
   const [devices, setDevices] = useState([]);
-  const webcamRef = useRef(null);
   const { store } = useContext(StateContext);
   const _currentSelectedDevice = store((state) => state.devideId);
   const _setCurrentSelectedDevice = store((state) => state.setDevideId);
@@ -33,29 +36,23 @@ function Camera({ isMirror = true, showSelectDevice = true }) {
       setDevices(_videoDevices);
       /// If selected is null, set the first device as selected
       if (!_currentSelectedDevice && _videoDevices.length > 0) {
-        console.log(devices[0].deviceId);
         _setCurrentSelectedDevice(_videoDevices[0].deviceId);
       }
     });
-    /// Unmount webcam component
-    return () => {
-      if (webcamRef.current) {
-        webcamRef.current.video.pause();
-        webcamRef.current.video.srcObject = null;
-      }
-    };
   }, []);
 
   return (
     <div className={style.container}>
       {_currentSelectedDevice ? (
         <Webcam
-          ref={webcamRef}
           className={style.camera}
           audio={false}
           mirrored={isMirror}
           videoConstraints={videoConstraints}
-        />
+          screenshotFormat="image/jpeg"
+        >
+          {mediaCallback}
+        </Webcam>
       ) : (
         <Typography.Text className={style.initCameraText}>
           {appStrings.camera.initCamera}
