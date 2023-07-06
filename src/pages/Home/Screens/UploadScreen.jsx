@@ -44,10 +44,10 @@ function UploadScreen() {
 
   // Images
   const { store: globalStore } = useContext(StateContext);
-  const images = globalStore((state) => state.images);
-  const setImages = globalStore((state) => state.setImages);
-  const uploadName = globalStore((state) => state.uploadName);
-  const setUploadName = globalStore((state) => state.setUploadName);
+  const images = globalStore((state) => state.userUploadImages);
+  const setImages = globalStore((state) => state.setUserUploadImages);
+  const uploadName = globalStore((state) => state.userUploadName);
+  const setUploadName = globalStore((state) => state.setUserUploadName);
 
   // Faces
   const [faces, setFaces] = useState([]);

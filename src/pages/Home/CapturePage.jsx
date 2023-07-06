@@ -17,7 +17,7 @@ function CapturePage() {
   const circleRadius = 200;
 
   const { store } = useContext(StateContext);
-  const setGlobalImages = store((state) => state.setImages);
+  const setGlobalImages = store((state) => state.setUserUploadImages);
   const [images, setImages] = useState([]);
   const [isCapturing, setIsCapturing] = useState(false);
 

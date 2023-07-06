@@ -8,11 +8,10 @@ export const initialState = {
   isLoading: false,
   /// Sidebar
   selectedSidebarItem: sidebarOptions[0].key,
-  /// Camera
-  devideId: null,
-  images: [],
-  /// Upload
-  uploadName: "",
+  /// Register Faces
+  currentCameraId: null,
+  userUploadImages: [],
+  userUploadName: "",
 };
 
 export const StateContext = createContext();

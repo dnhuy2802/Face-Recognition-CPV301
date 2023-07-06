@@ -13,8 +13,8 @@ function Camera({
 }) {
   const [devices, setDevices] = useState([]);
   const { store } = useContext(StateContext);
-  const _currentSelectedDevice = store((state) => state.devideId);
-  const _setCurrentSelectedDevice = store((state) => state.setDevideId);
+  const _currentSelectedDevice = store((state) => state.currentCameraId);
+  const _setCurrentSelectedDevice = store((state) => state.setCurrentCameraId);
 
   const videoConstraints = {
     width: 1280,
@@ -35,7 +35,7 @@ function Camera({
       );
       setDevices(_videoDevices);
       /// If selected is null, set the first device as selected
-      if (!_currentSelectedDevice && _videoDevices.length > 0) {
+      if (_currentSelectedDevice == null && _videoDevices.length > 0) {
         _setCurrentSelectedDevice(_videoDevices[0].deviceId);
       }
     });
@@ -43,7 +43,7 @@ function Camera({
 
   return (
     <div className={style.container}>
-      {_currentSelectedDevice ? (
+      {_currentSelectedDevice != null ? (
         <Webcam
           className={style.camera}
           audio={false}
