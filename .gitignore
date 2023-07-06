@@ -1,0 +1,8 @@
+/env
+/venv
+.vscode
+__pycache__/
+app/resources/
+app/model/*.h5
+app/data/
+*pyc
