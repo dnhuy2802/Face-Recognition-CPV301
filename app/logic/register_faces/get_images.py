@@ -2,11 +2,11 @@
 
 import os
 import base64
-from .constants import CACHE_DIR
-from ..models import IdentityModel
+from ...utils.constants import CACHE_DIR
+from ...models import FaceModel
 
 
-def get_identifiers():
+def get_images():
     # Return the names of the people in the cache directory
     ids = os.listdir(CACHE_DIR)
     for id in ids:
@@ -19,4 +19,4 @@ def get_identifiers():
         with open(img_path, 'rb') as f:
             img = base64.b64encode(f.read()).decode('utf-8')
         # Return the name and image of the person
-        yield IdentityModel.create(id, [img])
+        yield FaceModel.create(id, [img])

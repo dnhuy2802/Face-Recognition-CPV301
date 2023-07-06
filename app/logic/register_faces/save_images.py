@@ -2,7 +2,7 @@ import os
 import base64
 import cv2 as cv
 import numpy as np
-from .constants import CACHE_DIR, IMAGE_SIZE
+from ...utils.constants import CACHE_DIR, IMAGE_SIZE
 
 
 def save_images(name: str, images: list[str]):
