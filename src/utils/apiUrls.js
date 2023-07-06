@@ -1,9 +1,9 @@
 export const apiUrls = {
   // Auth
   // Upload
-  upload: {
-    images: "/apis/upload/images",
-    identifiers: "/apis/upload/identifiers",
-    delete: "/apis/upload/delete",
+  register: {
+    new: "/register_faces/new",
+    faces: "/register_faces",
+    delete: "/register_faces",
   },
 };

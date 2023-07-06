@@ -32,13 +32,7 @@ function CapturePage() {
     navigator("/");
   }
 
-  // If name is not set, redirect to home page
-  useEffect(() => {
-    if (!name) {
-      navigator("/");
-    }
-  }, []);
-
+  // Get screenshot callback
   const mediaCallback = useMemo(
     () =>
       ({ getScreenshot }) => {
@@ -47,6 +41,7 @@ function CapturePage() {
     []
   );
 
+  // Add image to state
   const addImage = useCallback((image) => {
     setImages((prev) => [...prev, image]);
   }, []);
@@ -59,6 +54,13 @@ function CapturePage() {
       addImage(image);
     }, 200);
   }
+
+  // If name is not set, redirect to home page
+  useEffect(() => {
+    if (!name) {
+      navigator("/");
+    }
+  }, []);
 
   // Stop capturing
   useEffect(() => {

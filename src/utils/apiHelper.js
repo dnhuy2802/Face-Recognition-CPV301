@@ -6,7 +6,7 @@ import { debugLogger } from "./utilities";
 
 /// Base API instance including the base URL and timeout
 const apiInstance = axios.create({
-  baseURL: "http://127.0.0.1:5000",
+  baseURL: "http://127.0.0.1:5000/apis",
   timeout: 1000,
   headers: {
     "Content-Type": "application/json",

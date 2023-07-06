@@ -9,7 +9,6 @@ import Spacer from "../../../components/Spacer";
 import Grid from "../../../components/Grid";
 import FaceCard from "../../../components/FaceCard";
 import Camera from "../../../components/Camera";
-import { MOCK_DATA } from "../../../utils/mockData";
 import useProviderState from "../../../hooks/useProviderState";
 import { initialState, InputContext } from "../../../contexts/nameInputContext";
 import Flex from "../../../components/Flex";
@@ -17,10 +16,10 @@ import { convertLowerCase, trimString } from "../../../utils/utilities";
 import DebouncedInput from "../../../components/DebouncedInput";
 import { StateContext } from "../../../contexts/stateContext";
 import {
-  uploadImages,
+  uploadFaces,
   getFaces,
   deleteFace,
-} from "../../../apis/uploadService";
+} from "../../../apis/registerFacesService";
 import { BASE64_PREFIX } from "../../../utils/constants";
 
 function UploadScreen() {
@@ -104,6 +103,15 @@ function UploadScreen() {
     });
   }
 
+  useEffect(() => {
+    // If have images, start upload
+    if (images.length > 0) {
+      uploadFaces(uploadName, images).then(() => setImages([]));
+    }
+    // Fetch faces
+    getFaces().then((res) => setFaces(res));
+  }, [images]);
+
   // Get Upload Content. If have images, start upload
   function getUploadContent() {
     if (images.length === 0) {
@@ -144,15 +152,6 @@ function UploadScreen() {
       );
     }
   }
-
-  useEffect(() => {
-    // If have images, start upload
-    if (images.length > 0) {
-      uploadImages(uploadName, images).then(() => setImages([]));
-    }
-    // Fetch faces
-    getFaces().then((res) => setFaces(res));
-  }, [images]);
 
   // Get face cards
   function getFaceCards() {
