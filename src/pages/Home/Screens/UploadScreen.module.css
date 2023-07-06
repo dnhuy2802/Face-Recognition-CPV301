@@ -1,0 +1,22 @@
+.container {
+    width: 100%;
+}
+
+.captureButton {
+    width: 100%;
+    height: 10rem;
+}
+
+.searchInput {
+    width: 10rem;
+}
+
+.startCaptureButton {
+    width: 100%;
+    height: 4rem;
+}
+
+.uploadProgress {
+    width: 100%;
+    margin: 0;
+}
