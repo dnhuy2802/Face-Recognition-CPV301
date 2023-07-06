@@ -33,4 +33,9 @@ export const appStrings = {
   camera: {
     initCamera: "Initializing Camera...",
   },
+  // Train
+  train: {
+    title: "Select Training Option",
+    button: "Start Training",
+  },
 };

@@ -6,4 +6,8 @@ export const apiUrls = {
     faces: "/register_faces",
     delete: "/register_faces",
   },
+  // Train
+  train: {
+    start: "/train/start",
+  },
 };
