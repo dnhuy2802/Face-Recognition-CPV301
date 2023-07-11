@@ -7,7 +7,6 @@ from app import apis_bp
 ### Initialize Flask App ###
 app = Flask(__name__)
 
-
 ### Cross-origin config ###
 CORS(app, resources={r"/*": {"origins": "*"}})
 

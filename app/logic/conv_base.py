@@ -44,31 +44,23 @@ def ConvNeXtBase(input_shape: tuple[int], num_classes: int = 1):
     :return: model
     """
     model = Sequential()
-
-    # Block 1
     model.add(
-        Conv2D(
-            32,
-            kernel_size=(3, 3),
-            strides=(1, 1),
-            input_shape=input_shape,
-            padding="same",
-            activation="relu",
-            kernel_constraint=maxnorm(3),
-        ))
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+        Conv2D(32, (3, 3),
+               input_shape=input_shape,
+               padding='same',
+               activation='relu',
+               kernel_constraint=maxnorm(3)))
+    model.add(Dropout(0.2))
     model.add(
-        Conv2D(64,
-               kernel_size=(5, 5),
-               strides=(1, 1),
-               activation="relu",
-               padding="same",
+        Conv2D(32, (3, 3),
+               activation='relu',
+               padding='same',
                kernel_constraint=maxnorm(3)))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Flatten())
-    model.add(Dense(1024, activation="relu", kernel_constraint=maxnorm(3)))
+    model.add(Dense(1024, activation='relu', kernel_constraint=maxnorm(3)))
     model.add(Dropout(0.5))
-    model.add(Dense(num_classes, activation="softmax"))
+    model.add(Dense(num_classes, activation='softmax'))
     return model
 
 
@@ -80,9 +72,6 @@ def load_data(path, image_size: tuple[int, int]):
     """
     print("[INFO] loading facial landmark predictor...")
     detector = dlib.get_frontal_face_detector()
-    predictor = dlib.shape_predictor(
-        os.path.join(os.getcwd(), "app", "models",
-                     "shape_predictor_68_face_landmarks.dat"))
 
     img_data_list = []
     labels = []
@@ -92,15 +81,17 @@ def load_data(path, image_size: tuple[int, int]):
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             # Detect faces in the grayscale frame
             rects = detector(gray, 0)
-            for (i, rect) in enumerate(rects):
-                (x, y, w, h) = face_utils.rect_to_bb(rect)
-                face = gray[y:y + h, x:x + w]
-                face = cv2.resize(face, image_size)
-                img_data_list.append(face)
+            if len(rects) != 0:
+                for (i, rect) in enumerate(rects):
+                    (x, y, w, h) = face_utils.rect_to_bb(rect)
+                    face = gray[y:y + h, x:x + w]
+                    face = cv2.resize(face, image_size)
+                    img_data_list.append(face)
+                    labels.append(inx)
+            else:
+                img_data = cv2.resize(gray, image_size)
+                img_data_list.append(img_data)
                 labels.append(inx)
-            # img_data = cv2.resize(img, image_size)
-            # img_data_list.append(img_data)
-            # labels.append(inx)
 
     # Data Handle
     data = np.array(img_data_list)
@@ -139,10 +130,6 @@ def train_model(path, image_size: tuple[int, int]):
                                                         y,
                                                         test_size=0.2,
                                                         random_state=42)
-    display(X_train.shape)
-    display(X_test.shape)
-    display(y_train.shape)
-    display(y_test.shape)
 
     # get image shape
     img_shape = data[0].shape
@@ -178,20 +165,9 @@ def train_model(path, image_size: tuple[int, int]):
 
 
 path = os.path.join(os.getcwd(), "app", "resources")
-image_size = (128, 128)
+image_size = (112, 112)
 model = train_model(path, image_size)
 
 # Save model
-model.save(os.path.join(os.getcwd(), "app", "model", "model.h5"))
-
-# # # Save model
-# # model.save(os.path.join(path, "model_ai", "model.h5"))
-
-# # serialize model to JSON
-# model_json = model.to_json()
-# with open(os.path.join(os.getcwd(), "app", "models", "model.json"),
-#           "w") as json_file:
-#     json_file.write(model_json)
-# # serialize weights to HDF5
-# model.save_weights(os.path.join(os.getcwd(), "app", "models", "model.h5"))
-# print("Saved model to disk")
+model.save(os.path.join(os.getcwd(), "app", "model", "model.keras"),
+           save_format="keras")

@@ -2,114 +2,156 @@ import cv2
 import numpy as np
 from keras.models import load_model
 import os
-import dlib
-from imutils import face_utils
-from imutils import resize
 from IPython.display import display
+from constants import *
+
+
+def detectFaceOpenCVDnn(net, model, frame, image_size: tuple, conf_threshold=0.8, percent_expand=0.0):
+    frameHeight = frame.shape[0]
+    frameWidth = frame.shape[1]
+    blob = cv2.dnn.blobFromImage(
+        frame,
+        1.0,
+        (300, 300),
+        [104, 117, 123],
+        False,
+        False,
+    )
+
+    net.setInput(blob)
+    detections = net.forward()
+    peoples = list()
+    for i in range(detections.shape[2]):
+        confidence = detections[0, 0, i, 2]
+        if confidence > conf_threshold:
+            x1 = int(detections[0, 0, i, 3] * frameWidth)
+            y1 = int(detections[0, 0, i, 4] * frameHeight)
+            x2 = int(detections[0, 0, i, 5] * frameWidth)
+            y2 = int(detections[0, 0, i, 6] * frameHeight)
+
+            # expand the bounding box
+            x1 = int(x1 - (x2 - x1) * (percent_expand) / 2)
+            y1 = int(y1 - (y2 - y1) * (percent_expand) / 2)
+            x2 = int(x2 + (x2 - x1) * (percent_expand) / 2)
+            y2 = int(y2 + (y2 - y1) * (percent_expand) / 2)
+
+            bboxes = [x1, y1, x2, y2]
+
+            top = x1
+            right = y1
+            bottom = x2 - x1
+            left = y2 - y1
+
+            # detected face
+            face = frame[right:right + left, top:top + bottom]
+            face = cv2.resize(face, image_size)
+            face = np.expand_dims(face, axis=0)
+
+            # predict the face
+            pred = model.predict(face)
+            confidence_face_pred = np.max(pred)
+
+            # if the confidence_face_pred is higher than threshold
+            if confidence_face_pred > 0.7:
+                # get the name of the face according to the predicted class
+                name = class_names[np.argmax(pred)]
+                peoples.append({
+                    "name": name,
+                    "bboxes": bboxes,
+                    "confidence": confidence_face_pred
+                })
+            else:
+                name = "Unknown"
+                peoples.append(
+                    {
+                        "name": name,
+                        "bboxes": bboxes,
+                        "confidence": confidence_face_pred
+                    }
+                )
+    # return the face have confident highest and the bounding boxes
+    if len(peoples) > 0:
+        return peoples
+    else:
+        return None
+
+# Set the font and color for displaying the recognized face name
+font = cv2.FONT_HERSHEY_SIMPLEX
+
+class_names = [
+    f for f in os.listdir(TRAIN_DATA_DIR)
+    if os.path.isdir(os.path.join(TRAIN_DATA_DIR, f))
+]
+num_classes = len(class_names)
+display(class_names)
 
 # Load the trained face recognition model
-model = load_model(
-    os.path.join(os.getcwd(), "app", "model",
-                 "resnet50_face_recognition_model.h5"))
+model = load_model(os.path.join(MODEL_DIR,"resnet50_face_recognition_model.keras"))
 print("Loaded model from disk")
 
 # Load the pre-trained face detection cascade classifier
 print("[INFO] loading facial landmark predictor...")
-# face_cascade = cv2.CascadeClassifier(
-#     os.path.join(os.getcwd(), "app", "models",
-#                  "haarcascade_frontalface_default.xml"))
-detector = dlib.get_frontal_face_detector()
-# predictor = dlib.shape_predictor(
-#     os.path.join(os.getcwd(), "app", "model",
-#                  "shape_predictor_68_face_landmarks.dat"))
+modelFile = os.path.join(MODEL_DIR, "res10_300x300_ssd_iter_140000_fp16.caffemodel")
+configFile = os.path.join(MODEL_DIR, "deploy.prototxt")
+net = cv2.dnn.readNetFromCaffe(configFile, modelFile)
+net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
 
-# Define the labels or names for each person in your dataset
-train_data_dir = os.path.join(os.getcwd(), "app", "data", "train")
-labels = [
-    f for f in os.listdir(train_data_dir)
-    if os.path.isdir(os.path.join(train_data_dir, f))
-]
-
-# Set the font and color for displaying the recognized face name
-font = cv2.FONT_HERSHEY_SIMPLEX
-font_scale = 1
-font_color = (0, 255, 0)  # Green
 
 # Initialize the video capture
 video_capture = cv2.VideoCapture(0)
 
-image_size = (224, 224)
+if not video_capture.isOpened():
+    print("Unable to access the camera")
+else:
+    print("Access to the camera was successfully obtained")
 
+print("Streaming started - to quit press ESC")
 while True:
-    # Capture frame-by-frame from the camera
+
+    # Capture frame-by-frame
     ret, frame = video_capture.read()
-
-    # flip image
-    frame = cv2.flip(frame, 1)
-    # frame = resize(frame, width=800)
-
-    # Convert the frame to grayscale for face detection
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-    # Perform face detection
-    # faces = face_cascade.detectMultiScale(gray,
-    #                                       scaleFactor=1.1,
-    #                                       minNeighbors=5,
-    #                                       minSize=(30, 30))
-    # Detect faces in the grayscale frame
-    rects = detector(gray, 0)
-    display(rects)
-
-    # Loop over the detected faces
-    for (i, rect) in enumerate(rects):
-        # # Extract the face region of interest (ROI)
-        (x, y, w, h) = face_utils.rect_to_bb(rect)
-        face = frame[y:y + h, x:x + w]
-
-        # # Preprocess the face image (resize, normalize, etc.) before feeding it to the model
-        # preprocessed_face = cv2.resize(
-        #     face,
-        #     image_size)  # Resize the face image to the desired input size
-        # preprocessed_face = preprocessed_face.astype(
-        #     'float32') / 255.0  # Normalize pixel values to the range of 0-1
-        # preprocessed_face = np.expand_dims(preprocessed_face, axis=0)
-
-        # Preprocess face
-        # face = gray[y:y + h, x:x + w]
-        preprocessed_face = cv2.resize(face, image_size)
-        preprocessed_face = preprocessed_face.astype('float32') / 255.0
-        preprocessed_face = np.expand_dims(preprocessed_face, axis=-1)
-        preprocessed_face = np.expand_dims(preprocessed_face, axis=0)
-
-        # Perform face recognition using the trained model
-        # Pass the preprocessed face image to the model for prediction
-        # You need to implement this part based on your model's input requirements
-
-        # Get the predicted label (person name) and confidence score
-        # You need to implement this part based on your model's output
-        predictions = model.predict(preprocessed_face)
-
-        # Get the predicted label (person name) and confidence score
-        label_index = np.argmax(predictions[0])
-        label = labels[label_index]
-        confidence = predictions[0][label_index]
-
-        # convert dlib's rectangle to a OpenCV-style bounding box
-        # [i.e., (x, y, w, h)], then draw the face bounding box
-        # bounding box
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        # show the face name
-        cv2.putText(frame, f"Face #{label} - ({confidence:.2f})",
-                    (x - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                    (0, 255, 0), 2)
-
-    # Display the resulting frame
-    cv2.imshow('Face Recognition', frame)
-
-    # Exit the loop if 'q' is pressed
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    if not ret:
+        print("Can't receive frame (stream end?). Exiting ...")
         break
 
-# Release the video capture and close the windows
+    frame = cv2.flip(frame, 1)
+
+    # detect peoples in the image
+    peoples = detectFaceOpenCVDnn(net, model, frame, IMAGE_SIZE)
+    display(peoples)
+    # loop over the peoples detected
+    if peoples is not None:
+        for people in peoples:
+            name = people["name"]
+            bboxes = people["bboxes"]
+            confidence = people["confidence"]
+            # draw the bounding box of the face along with the associatedq
+            (x1, y1, x2, y2) = bboxes
+
+            if name == "Unknown":
+                color = RED
+            else:
+                color = GREEN
+
+            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+            cv2.putText(frame, "Face #{} - {:.2f}%".format(name, confidence*100), (x1 - 10, y1 - 10), font, FONT_SCALE, color, 1)
+
+    # display the resulting frame
+    cv2.imshow("Face detector - to quit press ESC", frame)
+
+    # Exit with ESC
+    key = cv2.waitKey(1)
+    if key % 256 == 27:  # ESC code
+        break
+    # Exit with window close
+    if cv2.getWindowProperty("Face detector - to quit press ESC", 0) < 0:
+        break
+    # Exit with q
+    if key % 256 == ord('q'):
+        break
+
+# when everything done, release the capture
 video_capture.release()
 cv2.destroyAllWindows()
+print("Streaming ended")

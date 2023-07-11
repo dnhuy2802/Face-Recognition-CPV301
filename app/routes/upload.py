@@ -16,7 +16,7 @@ def upload():
     # Save the image to resource folder
     path = save_images(person.name, person.images)
     # Resize the images
-    resize_images(path)
+    # resize_images(path)
     # Return the id of the person
     return ResponseObject.success(person.id)
 
