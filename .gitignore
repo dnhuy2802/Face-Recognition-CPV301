@@ -5,4 +5,8 @@ __pycache__/
 app/resources/
 app/model/*.h5
 app/data/
+*pyc/env
+.vscode
+__pycache__/
 *pyc
+app/cache/*
