@@ -12,6 +12,9 @@ export const initialState = {
   currentCameraId: null,
   userUploadImages: [],
   userUploadName: "",
+  /// Training
+  isTraining: false,
+  faceOptions: [],
 };
 
 export const StateContext = createContext();

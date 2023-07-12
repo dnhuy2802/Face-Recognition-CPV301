@@ -52,6 +52,9 @@ function UploadScreen() {
   // Faces
   const [faces, setFaces] = useState([]);
 
+  // Face Options for Training
+  const setFaceOptions = globalStore((state) => state.setFaceOptions);
+
   // Toggle modal handler
   const toggleModal = () => setIsModalVisible((prev) => !prev);
 
@@ -75,14 +78,16 @@ function UploadScreen() {
     _setErrorMessage("");
   }
 
-  // Name input value change handler
+  /// Name input value change handler
+  /// Check if input value is valid when value change
   function onInputValueChange(e) {
     const _inputValue = e.target.value;
     _validateInputValue(_inputValue);
     _setValue(_inputValue);
   }
 
-  // Start capture handler
+  /// Start capture handler
+  /// If validated, navigate to capture screen, set upload name and toggle modal
   function onStartCapture() {
     _validateInputValue(_value);
     // If error or no value
@@ -97,19 +102,37 @@ function UploadScreen() {
     }
   }
 
+  /// Handle Set Face Options
+  /// Update faces and face options for training phase
+  function setFacesAndOptions(faceList) {
+    setFaces(faceList);
+    setFaceOptions(
+      faceList.map((item) => {
+        return {
+          label: item.name,
+          value: item.identifier,
+        };
+      })
+    );
+  }
+
+  /// This function handle delete face
+  /// Update faces and face options
   function onDeleteFace(name) {
     deleteFace(name).then(() => {
-      getFaces().then((res) => setFaces(res));
+      getFaces().then((res) => setFacesAndOptions(res));
     });
   }
 
+  /// Initialize Effects
+  /// Component call this when first render and images change
   useEffect(() => {
     // If have images, start upload
     if (images.length > 0) {
       uploadFaces(uploadName, images).then(() => setImages([]));
     }
     // Fetch faces
-    getFaces().then((res) => setFaces(res));
+    getFaces().then((res) => setFacesAndOptions(res));
   }, [images]);
 
   // Get Upload Content. If have images, start upload
@@ -176,7 +199,7 @@ function UploadScreen() {
           {_data.map((item) => (
             <FaceCard
               key={item.id}
-              id={item.id}
+              id={item.identifier}
               imgUrl={`${BASE64_PREFIX}${item.thumbnail}`}
               name={item.name}
               onDelete={() => onDeleteFace(item.name)}
