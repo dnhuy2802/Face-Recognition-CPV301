@@ -6,6 +6,6 @@ train_bp = Blueprint('train', __name__, url_prefix='/train')
 
 
 ### Routes ###
-@train_bp.route('/', methods=['GET'])
+@train_bp.route('/train', methods=['POST'])
 def train():
     return "Train Image"

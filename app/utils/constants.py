@@ -2,4 +2,5 @@
 import os
 
 CACHE_DIR = os.path.join(os.getcwd(), 'app', 'cache')
-IMAGE_SIZE = (112, 112)
+IMAGE_EXT = '.jpg'
+TRAINING_IMAGE_SIZE = 112

@@ -1,7 +1,8 @@
 ### Face Model ###
 # Used to store the data of the person
 
-from ..utils.utils import convert_to_snake_case, generate_uuid
+from unidecode import unidecode
+from ..utils.utils import get_idetifier, generate_uuid
 
 
 class FaceModel:
@@ -22,7 +23,7 @@ class FaceModel:
     def create(name: str, images: list[str]):
         return FaceModel(
             id=generate_uuid(),
-            identifier=convert_to_snake_case(name),
+            identifier=get_idetifier(name),
             name=name,
             images=images
         )
