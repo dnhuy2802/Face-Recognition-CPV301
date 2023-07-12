@@ -1,2 +1,2 @@
-from .identity_model import IdentityModel
+from .face_model import FaceModel
 from .response import ResponseObject
