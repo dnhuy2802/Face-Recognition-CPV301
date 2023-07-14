@@ -1,7 +1,7 @@
 from app.logic.eigenfaces import MeanFaces
 from app.logic.eigenfaces import PCASVM
 from app.logic.face_detectors.hog_face import HogFaceDetector
-from app.logic.utils.get_dataset import force_resize
+from app.logic.utils.get_dataset import split_img
 import cv2 as cv
 from app.utils.constants import TRAINING_IMAGE_SIZE
 
@@ -23,9 +23,9 @@ if __name__ == '__main__':
         faces = detector.detect_faces(pred_frame)
 
         for face in faces:
-            (x, y, w, h) = detector.get_cordinate(face)
+            cord = detector.get_cordinate(face)
             # Resize face
-            face_resized = force_resize(pred_frame[y:y+h, x:x+w])
+            face_resized = split_img(pred_frame, cord)
             # Predict
             pred = model.predict(face_resized)
             # Show face
