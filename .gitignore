@@ -1,4 +1,17 @@
 /env
+/venv
+.vscode
+__pycache__/
+app/resources/
+app/model/*.h5
+app/model/*.keras
+app/data/
+app/temp/
+*pyc/env
+.vscode
+__pycache__/
+*pyc
+app/cache/*/env
 .vscode
 __pycache__/
 *pyc
