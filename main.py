@@ -20,3 +20,4 @@ def main():
 
 ### Import Blueprints ###
 app.register_blueprint(apis_bp)
+    

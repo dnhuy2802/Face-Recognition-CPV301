@@ -3,3 +3,5 @@
 __pycache__/
 *pyc
 app/cache/*
+app/resources/
+app/data/
