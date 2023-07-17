@@ -3,7 +3,7 @@ import enum
 import pandas as pd
 from ..logic.eigenfaces import PCASVM
 from ..utils.utils import generate_uuid
-from ..utils.constants import MODEL_DIR, ML_MODEL_EXT
+from ..utils.constants import MODEL_DIR, ML_MODEL_EXT, DL_MODEL_EXT
 
 
 class TrainingType(enum.Enum):
@@ -55,13 +55,13 @@ class DLOptions:
 
 
 class RecognitionModel:
-    def __init__(self, type: str, registered_faces: list[str], options: MLOptions | DLOptions, ext: str = ML_MODEL_EXT):
+    def __init__(self, type: str, registered_faces: list[str], options: MLOptions | DLOptions, ext: str):
         self.type = type
         self.registered_faces = registered_faces
         self.options = options
+        self.ext = ext
         self.name = self.get_name()
         self.path = self.get_path()
-        self.ext = ext
 
     def get_name(self):
         name = self.type + '_' + generate_uuid()
@@ -76,13 +76,16 @@ class RecognitionModel:
         if json['type'] == TrainingType.ML.value:
             json_type = json['options']['mlAlgorithm']
             options = MLOptions.from_json(json['options'])
+            ext = ML_MODEL_EXT
         if json['type'] == TrainingType.DL.value:
             json_type = json['options']['dlNetwork']
             options = DLOptions.from_json(json['options'])
+            ext = DL_MODEL_EXT
         return RecognitionModel(
             json_type,
             json['faces'],
             options,
+            ext,
         )
 
 

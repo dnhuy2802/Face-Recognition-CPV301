@@ -11,6 +11,7 @@ DEFAULT_FINE_TUNE = 0
 LEARNING_RATE = 0.001
 DECAY = LEARNING_RATE / DEFAULT_EPOCHS
 IMAGE_SIZE = tuple([TRAINING_IMAGE_SIZE, TRAINING_IMAGE_SIZE])
+INPUT_SHAPE = tuple([TRAINING_IMAGE_SIZE, TRAINING_IMAGE_SIZE, 3])
 MOMENTUM = 0.9
 NUM_CLASSES = int()
 PEOPLE_LABELS = list()
@@ -22,8 +23,6 @@ VALID_DATA_DIR = os.path.join(LOGIC_DIR, "temp", "valid")
 TEST_DATA_DIR = os.path.join(LOGIC_DIR, "temp", "test")
 TEMP_DATA_DIR = os.path.join(os.getcwd(), "app", "temp")
 ASSETS_DIR = os.path.join(LOGIC_DIR, "assets")
-RESOURCES_DIR = os.path.join(os.getcwd(), "app", "resources")
-DATA_DIR = os.path.join(os.getcwd(), "app", "data")
 
 # Text Variables
 RED = (0, 0, 255)

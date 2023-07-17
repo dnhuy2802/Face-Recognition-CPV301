@@ -8,7 +8,7 @@ from ...utils.constants import CACHE_DIR
 
 
 ### Get dataset in the form of (faces, labels) ###
-def get_dataset(registered_faces: list[str], path_only: bool = False) -> tuple[np.ndarray[cv.Mat | str], np.ndarray[str]]:
+def get_dataset(registered_faces: list[str], path_only: bool = False, is_gray_scale: bool = True) -> tuple[np.ndarray[cv.Mat | str], np.ndarray[str]]:
     # Init face detector
     face_detector = HogFaceDetector()
     # Init empty array for faces and labels
@@ -22,7 +22,10 @@ def get_dataset(registered_faces: list[str], path_only: bool = False) -> tuple[n
                 faces.append(face_path)
                 labels.append(face)
                 continue
-            img: cv.Mat = cv.imread(face_path, cv.IMREAD_GRAYSCALE)
+            if is_gray_scale:
+                img = cv.imread(face_path, cv.IMREAD_GRAYSCALE)
+            else:
+                img = cv.imread(face_path, cv.IMREAD_COLOR)
             face_cordinate = face_detector.detect_face(img)
             face_image = split_img(img, face_cordinate)
             faces.append(face_image)

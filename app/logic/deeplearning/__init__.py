@@ -1,17 +1,24 @@
 import os
 import shutil
-import splitfolders
-import cv2 as cv
+import numpy as np
 from sklearn.model_selection import train_test_split
 from keras.applications.convnext import preprocess_input
 from keras.preprocessing.image import ImageDataGenerator
+from keras.models import Sequential, load_model
+from .vgg_model import VGGModel
+from .resnet_model import ResNetModel
+from .convnextbase_model import ConvNextBaseModel
 from ..utils.get_dataset import get_dataset
+from ...models.recognition_model import ModelType
+from .utils import save_to_temp, get_labels
 from .constants import *
 
 
 class DeepLearningModelWrapper:
     def __init__(self,
                  registered_faces: list[str],
+                 save_path: str,
+                 type: str = ModelType.VGG19.value,
                  train_percent: int = DEFAULT_TRAIN_RATIO,
                  valid_percent: int = DEFAULT_VALID_RATIO,
                  test_percent: int = DEFAULT_TEST_RATIO,
@@ -19,53 +26,31 @@ class DeepLearningModelWrapper:
                  epochs: int = DEFAULT_EPOCHS,
                  fine_tune: int = DEFAULT_FINE_TUNE):
         self.registered_faces = registered_faces
+        self.save_path = save_path
+        self.type = type
         self.train_percent = train_percent
         self.valid_percent = valid_percent
         self.test_percent = test_percent
         self.batch_size = batch_size
         self.epochs = epochs
         self.fine_tune = fine_tune
+        self.model: Sequential = None
+        self.labels = get_labels()
 
     def __split_folders(self):
-        # Copy the image data to the temp directory
-        shutil.copytree(RESOURCES_DIR, TEMP_DATA_DIR, dirs_exist_ok=True)
-
-        # Crop the images from the center
-        self.crop_image_from_center(TEMP_DATA_DIR)
-
-        # Delete the existing folders in the output directory
-        shutil.rmtree(DATA_DIR, ignore_errors=True)
-
-        # load face detection model
-        modelFile = os.path.join(MODEL_DIR,
-                                 "res10_300x300_ssd_iter_140000_fp16.caffemodel")
-        configFile = os.path.join(MODEL_DIR, "deploy.prototxt")
-        net = cv.dnn.readNetFromCaffe(configFile, modelFile)
-        net.setPreferableBackend(cv.dnn.DNN_BACKEND_CUDA)
-        net.setPreferableTarget(cv.dnn.DNN_TARGET_CUDA)
-
-        # save face after detect in to temp folder
-        for folder in os.listdir(TEMP_DATA_DIR):
-            for file in os.listdir(os.path.join(TEMP_DATA_DIR, folder)):
-                img = cv.imread(os.path.join(TEMP_DATA_DIR, folder, file))
-                face, bboxes = self.detectFaceOpenCVDnn(net, img)
-                if face is not None:
-                    cv.imwrite(os.path.join(
-                        TEMP_DATA_DIR, folder, file), face)
-                    # # resize the image to image_size
-                    # img = cv2.imread(os.path.join(TEMP_DATA_DIR, folder, file))
-                    # img = cv2.resize(img, IMAGE_SIZE)
-                    # cv2.imwrite(os.path.join(TEMP_DATA_DIR, folder, file), img)
-                else:
-                    os.remove(os.path.join(TEMP_DATA_DIR, folder, file))
-
-        splitfolders.ratio(input=TEMP_DATA_DIR,
-                           output=DATA_DIR,
-                           seed=42,
-                           ratio=(0.8, 0.1, 0.1),
-                           group_prefix=None)
-
-        shutil.rmtree(TEMP_DATA_DIR, ignore_errors=True)
+        X, y = get_dataset(self.registered_faces, is_gray_scale=False)
+        # Train, validation and test split
+        X_val_train, X_test, y_val_train, y_test = train_test_split(
+            X, y, test_size=self.test_percent, random_state=42)
+        X_train, X_val, y_train, y_val = train_test_split(
+            X_val_train, y_val_train, test_size=self.valid_percent / (1 - self.test_percent), random_state=42)
+        # Write to temp folder
+        for i, face in enumerate(y_train):
+            save_to_temp(X_train[i], face, TRAIN_DATA_DIR)
+        for i, face in enumerate(y_val):
+            save_to_temp(X_val[i], face, VALID_DATA_DIR)
+        for i, face in enumerate(y_test):
+            save_to_temp(X_test[i], face, TEST_DATA_DIR)
 
     def __data_generator(self):
         # Data augmentation for training set, validation set and test set
@@ -101,3 +86,66 @@ class DeepLearningModelWrapper:
                                                           target_size=IMAGE_SIZE,
                                                           batch_size=self.batch_size,
                                                           class_mode='categorical')
+
+        return train_generator, validation_generator, test_generator
+
+    def __load_model(self):
+        if self.type == ModelType.VGG19.value:
+            model = VGGModel(
+                self.registered_faces, self.save_path, self.batch_size, self.epochs, self.fine_tune)
+        elif self.type == ModelType.RESNET50.value:
+            model = ResNetModel(
+                self.registered_faces, self.save_path, self.batch_size, self.epochs, self.fine_tune)
+        elif self.type == ModelType.CONVNEXTBASE.value:
+            model = ConvNextBaseModel(
+                self.registered_faces, self.save_path, self.batch_size, self.epochs, self.fine_tune)
+        return model.model_create()
+
+    def fit(self):
+        # Split data into train, validation and test
+        self.__split_folders()
+        # Get data generator
+        train_generator, validation_generator, test_generator = self.__data_generator()
+        # Load model
+        self.model, callbacks = self.__load_model()
+        # Train model
+        self.model.fit(train_generator,
+                       epochs=self.epochs,
+                       validation_data=validation_generator,
+                       callbacks=callbacks)
+        # Evaluate model
+        score = self.model.evaluate(test_generator, verbose=1)
+        print('Test loss:', score[0])
+        print('Test accuracy:', score[1])
+        # Delete temp folder
+        for face in self.registered_faces:
+            shutil.rmtree(os.path.join(TRAIN_DATA_DIR, face))
+            shutil.rmtree(os.path.join(VALID_DATA_DIR, face))
+            shutil.rmtree(os.path.join(TEST_DATA_DIR, face))
+        # Return score
+        return score[1]
+
+    def predict(self, face: np.ndarray):
+        # Exapnd dimension
+        face = np.expand_dims(face, axis=0)
+        # Predict
+        pred = self.model.predict(face)
+        # Confidence
+        confidence_face_pred = np.max(pred)
+        # Return label
+        if confidence_face_pred > CONF_FACE_THRESHOLD:
+            return self.labels[np.argmax(pred)]
+        else:
+            return 'Unknown'
+
+    def save(self, path: str):
+        if self.type == ModelType.CONVNEXTBASE.value:
+            self.model.save_weights(path)
+        else:
+            self.model.save(path)
+
+    def load(self, path: str):
+        if self.type == ModelType.CONVNEXTBASE.value:
+            self.model.load_weights(path)
+        else:
+            self.model = load_model(path)

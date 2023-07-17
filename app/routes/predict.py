@@ -63,9 +63,8 @@ def on_recognizing(data):
                 cord = detector.get_cordinate(cordinate)
                 # Crop face
                 face = split_img(frame, cord)
-                face_gray = convert_to_gray(face)
                 # Predict
-                name = model.predict(face_gray)
+                name = model.predict(face)
                 # Add to recognized_faces
                 recognized_faces.append(
                     FaceResponseObject(name, 1, [*cord]).to_dict())

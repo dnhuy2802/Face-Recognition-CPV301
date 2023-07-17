@@ -3,6 +3,7 @@ import numpy as np
 from .pca import PCAFaces
 from sklearn.svm import SVC
 from ..utils.get_dataset import get_dataset, get_all_faces_names
+from ...utils.utils import convert_to_gray
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 
@@ -16,7 +17,7 @@ class ModelDataWrapper:
 
 
 class PCASVM:
-    def __init__(self, registed_faces: list[str] = get_all_faces_names(), k: int = 5, split_ratio: float = 0.2):
+    def __init__(self, registed_faces: list[str] = get_all_faces_names(), k: int = 25, split_ratio: float = 0.2):
         self.registed_faces = registed_faces
         self.split_ratio = split_ratio
         self.pca = PCAFaces(k=k)
@@ -50,6 +51,8 @@ class PCASVM:
         return score
 
     def predict(self, face: np.ndarray):
+        # Convert to gray scale
+        face = convert_to_gray(face)
         # Flatten face
         face = face.flatten().reshape(1, -1)
         # Fit PCA
