@@ -16,7 +16,7 @@ TRAIN_DATA_DIR = os.path.join(os.getcwd(), "app", "data", "train")
 VALIDATION_DATA_DIR = os.path.join(os.getcwd(), "app", "data", "val")
 TEST_DATA_DIR = os.path.join(os.getcwd(), "app", "data", "test")
 TEMP_DATA_DIR = os.path.join(os.getcwd(), "app", "temp")
-MODEL_DIR = os.path.join(os.getcwd(), "app", "model")
+MODEL_DIR = os.path.join(os.getcwd(), "app", "deeplearning", "model")
 RESOURCES_DIR = os.path.join(os.getcwd(), "app", "resources")
 DATA_DIR = os.path.join(os.getcwd(), "app", "data")
 

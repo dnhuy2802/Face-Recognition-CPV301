@@ -1,12 +1,18 @@
-from flask import Blueprint
-from .routes import register_faces_bp, train_bp, predict_bp
+from flask import Flask
+from flask_cors import CORS
+from flask_socketio import SocketIO
+
+### SocketIO ###
+io = SocketIO()
 
 
-### Create Blueprint ###
-apis_bp = Blueprint('apis', __name__, url_prefix='/apis')
-
-
-### Import Routes ###
-apis_bp.register_blueprint(register_faces_bp)
-apis_bp.register_blueprint(train_bp)
-apis_bp.register_blueprint(predict_bp)
+### Create Flask App ###
+def create_app():
+    # Initialize Flask App
+    app = Flask(__name__)
+    # Cross-origin config
+    CORS(app, resources={r"/*": {"origins": "*"}})
+    # Initialize SocketIO
+    io.init_app(app, cors_allowed_origins="*")
+    # Return Flask App
+    return app

@@ -3,13 +3,28 @@ from app.logic.eigenfaces import PCASVM
 from app.logic.face_detectors.hog_face import HogFaceDetector
 from app.logic.utils.get_dataset import split_img
 import cv2 as cv
-from app.utils.constants import TRAINING_IMAGE_SIZE
+import os
+from app.utils.constants import ML_MODEL_EXT, MODEL_DIR
+from app.logic.model_table import ModelTable
 
 
 if __name__ == '__main__':
 
-    model = PCASVM(['MinhDoan', 'HuyDao'], k=25)
-    model.fit()
+    # model = PCASVM(['MinhDoan', 'HuyDao'], k=25)
+    # acc = model.fit()
+
+    # path = os.path.join(MODEL_DIR, 'pcasvm_test' + ML_MODEL_EXT)
+
+    # model.save(path)
+
+    table = ModelTable()
+    # table.add_model('pcasvm_test', 'ml', path, acc)
+    table.load_table()
+
+    path = table.get_model('pcasvm_test', return_path=True)
+
+    blank_model = PCASVM()
+    blank_model.load(path)
 
     capture = cv.VideoCapture(0)
 
@@ -24,10 +39,11 @@ if __name__ == '__main__':
 
         for face in faces:
             cord = detector.get_cordinate(face)
+            x, y, w, h = cord
             # Resize face
             face_resized = split_img(pred_frame, cord)
             # Predict
-            pred = model.predict(face_resized)
+            pred = blank_model.predict(face_resized)
             # Show face
             cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
             cv.putText(frame, pred, (x, y - 10), cv.FONT_HERSHEY_SIMPLEX,

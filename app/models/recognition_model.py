@@ -1,35 +1,113 @@
+import os
 import enum
+import pandas as pd
+from ..logic.eigenfaces import PCASVM
+from ..utils.utils import generate_uuid
+from ..utils.constants import MODEL_DIR, ML_MODEL_EXT
 
 
-# Enum for Training Type
 class TrainingType(enum.Enum):
     # Machine Learning
-    EIGENFACE = 'Eigenface'
+    ML = 'ml'
     # Deep Learning
-    VGG16 = 'VGG16'
+    DL = 'dl'
 
 
-class RecognitionModel:
-    def __init__(self, training_type: TrainingType, registered_faces: list[str], model_path: str):
-        self.training_type = training_type
-        self.registered_faces = registered_faces
-        self.model_path = model_path
+class ModelType(enum.Enum):
+    # Machine Learning
+    PCASVM = 'pcasvm'
+    # Deep Learning
+    VGG19 = 'vgg19'
+    RESNET50 = 'resnet50'
+    CONVNEXTBASE = 'convnextbase'
 
-    def sign_model(self, model_path: str):
-        self.model_path = model_path
+
+class MLOptions:
+    def __init__(self, train: int, test: int):
+        self.train = train / 100
+        self.test = test / 100
 
     @staticmethod
     def from_json(json):
-        return RecognitionModel.create(
-            json['type'],
-            json['faces'],
-            None
+        return MLOptions(
+            train=json['mlTrain'],
+            test=json['mlTest'],
         )
 
+
+class DLOptions:
+    def __init__(self, train: int, valid: int, test: int, fine_tune: bool, batch_size: int):
+        self.train = train / 100
+        self.valid = valid / 100
+        self.test = test / 100
+        self.fine_tune = fine_tune
+        self.batch_size = batch_size
+
     @staticmethod
-    def create(training_type: TrainingType, registered_faces: list[str], model_path: str):
+    def from_json(json):
+        return DLOptions(
+            train=json['dlTrain'],
+            valid=json['dlValid'],
+            test=json['dlTest'],
+            fine_tune=json['dlFineTune'],
+            batch_size=json['dlBatchSize'],
+        )
+
+
+class RecognitionModel:
+    def __init__(self, type: str, registered_faces: list[str], options: MLOptions | DLOptions):
+        self.type = type
+        self.registered_faces = registered_faces
+        self.options = options
+        self.name = self.get_name()
+        self.path = self.get_path()
+
+    def get_name(self):
+        name = self.type + '_' + generate_uuid()
+        return name
+
+    def get_path(self):
+        path = os.path.join(MODEL_DIR, self.name + ML_MODEL_EXT)
+        return path
+
+    @staticmethod
+    def from_json(json):
+        if json['type'] == TrainingType.ML.value:
+            json_type = json['options']['mlAlgorithm']
+            options = MLOptions.from_json(json['options'])
+        if json['type'] == TrainingType.DL.value:
+            json_type = json['options']['dlNetwork']
+            options = DLOptions.from_json(json['options'])
         return RecognitionModel(
-            training_type=training_type,
-            registered_faces=registered_faces,
-            model_path=model_path
+            json_type,
+            json['faces'],
+            options,
+        )
+
+
+class RecognizedModel:
+    def __init__(self, name: str, type: TrainingType, path: str, accuracy: float):
+        self.name = name
+        self.type = type
+        self.path = path
+        self.accuracy = accuracy
+
+    def get_model_from_name(self):
+        if self.type == ModelType.PCASVM.value:
+            return PCASVM()
+        if self.type == ModelType.VGG19.value:
+            return None
+        if self.type == ModelType.RESNET50.value:
+            return None
+        if self.type == ModelType.CONVNEXTBASE.value:
+            return None
+        return None
+
+    @staticmethod
+    def from_df(series: pd.DataFrame):
+        return RecognizedModel(
+            series['name'][0],
+            series['type'][0],
+            series['path'][0],
+            series['accuracy'][0],
         )
