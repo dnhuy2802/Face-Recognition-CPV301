@@ -3,19 +3,27 @@
 
 import axios from "axios";
 import { debugLogger } from "./utilities";
+import { domain } from "./apiUrls";
 
 /// Base API instance including the base URL and timeout
 const apiInstance = axios.create({
-  baseURL: "http://127.0.0.1:5000/apis",
-  timeout: 1000,
+  baseURL: `${domain}/apis`,
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
 });
 
+const defaultConfig = {
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+};
+
 /// GET method
-export async function getMethod(url, config) {
+export async function getMethod(url, config = defaultConfig) {
   try {
     const response = await apiInstance.get(url, config);
     return response.data;
@@ -26,7 +34,7 @@ export async function getMethod(url, config) {
 }
 
 /// POST method
-export async function postMethod(url, data, config) {
+export async function postMethod(url, data, config = defaultConfig) {
   try {
     const response = await apiInstance.post(url, data, config);
     return response.data;
@@ -37,7 +45,7 @@ export async function postMethod(url, data, config) {
 }
 
 /// PUT method
-export async function putMethod(url, data, config) {
+export async function putMethod(url, data, config = defaultConfig) {
   try {
     const response = await apiInstance.put(url, data, config);
     return response.data;
@@ -48,7 +56,7 @@ export async function putMethod(url, data, config) {
 }
 
 /// DELETE method
-export async function deleteMethod(url, config) {
+export async function deleteMethod(url, config = defaultConfig) {
   try {
     const response = await apiInstance.delete(url, config);
     return response.data;

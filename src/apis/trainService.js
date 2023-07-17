@@ -7,11 +7,10 @@ export async function startTrain(type, faces, options) {
     faces: faces,
     options: options,
   };
-  return postMethod(apiUrls.train.start, _data).then((response) => {
-    if (response.success) {
-      return response.data;
-    } else {
-      throw new Error(response.message);
-    }
-  });
+  const response = await postMethod(apiUrls.train.start, _data);
+  if (response.success) {
+    return response.data;
+  } else {
+    throw new Error(response.message);
+  }
 }

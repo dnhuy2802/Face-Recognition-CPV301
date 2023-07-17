@@ -1,3 +1,5 @@
+export const domain = "http://localhost:5000";
+
 export const apiUrls = {
   // Auth
   // Upload
@@ -9,5 +11,10 @@ export const apiUrls = {
   // Train
   train: {
     start: "/train/start",
+  },
+  // Predict
+  predict: {
+    getModels: "/predict/models",
+    setModel: "/predict/models/set",
   },
 };

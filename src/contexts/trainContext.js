@@ -5,6 +5,7 @@ import { mlOptions, dlOptions } from "../utils/trainOptions";
 export const initialState = {
   /// Generals
   faces: [],
+  isTraining: false,
   /// ML Configs
   mlTrain: 70,
   mlTest: 30,
@@ -16,6 +17,8 @@ export const initialState = {
   dlFineTune: 0,
   dlBatchSize: 16,
   dlNetwork: dlOptions[0].value,
+  /// Accuracy
+  accuracy: null,
 };
 
 export const TrainContext = createContext();

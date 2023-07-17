@@ -14,6 +14,7 @@ import { StateContext } from "../../../contexts/stateContext";
 import { initialState } from "../../../contexts/trainContext";
 import useProviderState from "../../../hooks/useProviderState";
 import { startTrain } from "../../../apis/trainService";
+import { socket } from "../../../socket";
 
 function TrainScreen() {
   // Selected Option, Machine Learning or Deep Learning
@@ -28,6 +29,8 @@ function TrainScreen() {
   const store = useMemo(() => useProviderState(initialState), []);
   const faces = store((state) => state.faces);
   const setFaces = store((state) => state.setFaces);
+  const isTraining = store((state) => state.isTraining);
+  const setIsTraining = store((state) => state.setIsTraining);
   // Machine Learning Store
   const mlTrain = store((state) => state.mlTrain);
   const setMlTrain = store((state) => state.setMlTrain);
@@ -48,6 +51,9 @@ function TrainScreen() {
   const setDlBatchSize = store((state) => state.setDlBatchSize);
   const dlNetwork = store((state) => state.dlNetwork);
   const setDlNetwork = store((state) => state.setDlNetwork);
+  // Training results
+  const accuracy = store((state) => state.accuracy);
+  const setAccuracy = store((state) => state.setAccuracy);
 
   function handleFaceIdentityChange(values) {
     setFaces(values);
@@ -109,12 +115,26 @@ function TrainScreen() {
             dlBatchSize,
             dlNetwork,
           };
-    startTrain(selectedOption, faces, options);
+    setIsTraining(true);
+    // Start Training
+    const _data = {
+      type: selectedOption,
+      faces,
+      options,
+    };
+    socket.emit("training", _data);
   }
 
   /// Set Faces when initializing
   useEffect(() => {
     setFaces(faceOptions.map((option) => option.value));
+    // Listen to training results
+    socket.on("trained", (res) => {
+      if (res.success) {
+        setIsTraining(false);
+        setAccuracy(res.data.accuracy);
+      }
+    });
   }, []);
 
   function getTrainOptions() {
@@ -303,9 +323,16 @@ function TrainScreen() {
         type="primary"
         size="large"
         onClick={onStartTrainingPress}
+        loading={isTraining}
       >
         {appStrings.train.button}
       </Button>
+      <Spacer size={20} />
+      {accuracy !== null && (
+        <Typography.Title level={5}>
+          {appStrings.train.accuracyTitle}: {accuracy}%
+        </Typography.Title>
+      )}
     </Flex>
   );
 }

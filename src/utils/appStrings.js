@@ -55,5 +55,10 @@ export const appStrings = {
       valid: "Valid",
       test: "Test",
     },
+    accuracyTitle: "Accuracy",
+  },
+  // Recognize
+  recognize: {
+    selectPlaceholder: "Select a model",
   },
 };
