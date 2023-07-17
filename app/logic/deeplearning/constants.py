@@ -17,7 +17,7 @@ VALIDATION_DATA_DIR = os.path.join(os.getcwd(), "app", "data", "val")
 TEST_DATA_DIR = os.path.join(os.getcwd(), "app", "data", "test")
 TEMP_DATA_DIR = os.path.join(os.getcwd(), "app", "temp")
 MODEL_DIR = os.path.join(os.getcwd(), "app", "model")
-RESOURCES_DIR = os.path.join(os.getcwd(), "app", "resources")
+RESOURCES_DIR = os.path.join(os.getcwd(), "app", "resources", "data")
 DATA_DIR = os.path.join(os.getcwd(), "app", "data")
 
 # Text Variables

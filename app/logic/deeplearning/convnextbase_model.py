@@ -8,7 +8,7 @@ from tensorflow.keras.applications.convnext import preprocess_input
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.models import load_model
 from IPython.display import display
-from app.logic.constants import *
+from .constants import *
 
 import os
 import numpy as np
@@ -17,28 +17,30 @@ import dlib
 import warnings
 warnings.simplefilter(action='ignore', category=Warning)
 
+
 class ConvNextBaseModel:
     def __init__(self):
         self.people_lables = list()
         self.num_classes = int()
         self.num_train_samples = int()
-    
+
     def data_generator(self):
         # Data augmentation for training set, validation set and test set
         train_datagen = ImageDataGenerator(preprocessing_function=preprocess_input,
-                                        rotation_range=20,
-                                        width_shift_range=0.2,
-                                        height_shift_range=0.2,
-                                        brightness_range=(0.7, 1),
-                                        shear_range=0.2,
-                                        zoom_range=0.2,
-                                        horizontal_flip=True,
-                                        vertical_flip=False,
-                                        fill_mode='nearest')
+                                           rotation_range=20,
+                                           width_shift_range=0.2,
+                                           height_shift_range=0.2,
+                                           brightness_range=(0.7, 1),
+                                           shear_range=0.2,
+                                           zoom_range=0.2,
+                                           horizontal_flip=True,
+                                           vertical_flip=False,
+                                           fill_mode='nearest')
 
         validation_datagen = ImageDataGenerator(
             preprocessing_function=preprocess_input)
-        test_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+        test_datagen = ImageDataGenerator(
+            preprocessing_function=preprocess_input)
 
         # Load and prepare the training data, validation data and test data
         train_generator = train_datagen.flow_from_directory(TRAIN_DATA_DIR,
@@ -53,10 +55,10 @@ class ConvNextBaseModel:
             class_mode='categorical')
 
         test_generator = test_datagen.flow_from_directory(TEST_DATA_DIR,
-                                                        target_size=IMAGE_SIZE,
-                                                        batch_size=BATCH_SIZE,
-                                                        class_mode='categorical')
-        
+                                                          target_size=IMAGE_SIZE,
+                                                          batch_size=BATCH_SIZE,
+                                                          class_mode='categorical')
+
         # get name of the train classes
         train_labels = train_generator.class_indices
         self.people_lables = list(train_labels.keys())
@@ -65,13 +67,13 @@ class ConvNextBaseModel:
         display(self.people_lables)
         display(self.num_classes)
         display(self.num_train_samples)
-        
+
         return train_generator, validation_generator, test_generator
-    
+
     def model_create(self):
         model_base = ConvNeXtBase(weights='imagenet',
-                      include_top=False,
-                      input_shape=(IMG_HEIGHT, IMG_WIDTH, 3))
+                                  include_top=False,
+                                  input_shape=(IMG_HEIGHT, IMG_WIDTH, 3))
 
         # Freeze the weights of the pre-trained layers
         for layer in model_base.layers:
@@ -93,21 +95,21 @@ class ConvNextBaseModel:
 
         # Define the checkpoint and earlystop callbacks
         early_stopping = EarlyStopping(monitor='val_loss',
-                                    restore_best_weights=True,
-                                    patience=3,
-                                    verbose=1)
+                                       restore_best_weights=True,
+                                       patience=3,
+                                       verbose=1)
         checkpoint = ModelCheckpoint(os.path.join(MODEL_DIR, "convnextbase_model.keras"),
-                                    monitor='val_loss',
-                                    save_best_only=True,
-                                    mode='min',
-                                    verbose=1)
+                                     monitor='val_loss',
+                                     save_best_only=True,
+                                     mode='min',
+                                     verbose=1)
         callbacks = [early_stopping, checkpoint]
 
         # Compile the model
         model.compile(optimizer=Adam(lr=LRATE, decay=DECAY),
-                    loss='categorical_crossentropy',
-                    metrics=['accuracy'])
-        
+                      loss='categorical_crossentropy',
+                      metrics=['accuracy'])
+
         return model, callbacks
 
     def model_train(self):
@@ -118,17 +120,19 @@ class ConvNextBaseModel:
         model, callbacks = self.model_create()
 
         model.fit(train_generator,
-          steps_per_epoch=self.num_train_samples // BATCH_SIZE,
-          epochs=EPOCHS,
-          validation_data=validation_generator,
-          callbacks=callbacks)
+                  steps_per_epoch=self.num_train_samples // BATCH_SIZE,
+                  epochs=EPOCHS,
+                  validation_data=validation_generator,
+                  callbacks=callbacks)
 
         # Save the trained model
-        model.save_weights(os.path.join(MODEL_DIR,"convnextbase_model.keras"), overwrite=True, save_format="keras")
+        model.save_weights(os.path.join(
+            MODEL_DIR, "convnextbase_model.keras"), overwrite=True, save_format="keras")
 
         # Evaluate the model on the test data
         scores = model.evaluate(test_generator, verbose=1)
         print("Accuracy: %.2f%%" % (scores[1] * 100))
+
 
 class FaceRecognitionConvNextBaseModel:
     def __init__(self):
@@ -137,8 +141,8 @@ class FaceRecognitionConvNextBaseModel:
 
     def model_create(self):
         model_base = ConvNeXtBase(weights='imagenet',
-                      include_top=False,
-                      input_shape=(IMG_HEIGHT, IMG_WIDTH, 3))
+                                  include_top=False,
+                                  input_shape=(IMG_HEIGHT, IMG_WIDTH, 3))
 
         # Freeze the weights of the pre-trained layers
         for layer in model_base.layers:
@@ -160,23 +164,23 @@ class FaceRecognitionConvNextBaseModel:
 
         # Define the checkpoint and earlystop callbacks
         early_stopping = EarlyStopping(monitor='val_loss',
-                                    restore_best_weights=True,
-                                    patience=3,
-                                    verbose=1)
+                                       restore_best_weights=True,
+                                       patience=3,
+                                       verbose=1)
         checkpoint = ModelCheckpoint(os.path.join(MODEL_DIR, "convnextbase_model.keras"),
-                                    monitor='val_loss',
-                                    save_best_only=True,
-                                    mode='min',
-                                    verbose=1)
+                                     monitor='val_loss',
+                                     save_best_only=True,
+                                     mode='min',
+                                     verbose=1)
         callbacks = [early_stopping, checkpoint]
 
         # Compile the model
         model.compile(optimizer=Adam(lr=LRATE, decay=DECAY),
-                    loss='categorical_crossentropy',
-                    metrics=['accuracy'])
-        
+                      loss='categorical_crossentropy',
+                      metrics=['accuracy'])
+
         return model, callbacks
-       
+
     def convert_and_trim_bb(self, image, rect):
         # extract the starting and ending (x, y)-coordinates of the
         # bounding box
@@ -314,9 +318,10 @@ class FaceRecognitionConvNextBaseModel:
             return peoples
         else:
             return None
-        
+
     def face_predict(self):
-        self.people_lables = [ f for f in os.listdir(TRAIN_DATA_DIR) if os.path.isdir(os.path.join(TRAIN_DATA_DIR, f)) ]
+        self.people_lables = [f for f in os.listdir(
+            TRAIN_DATA_DIR) if os.path.isdir(os.path.join(TRAIN_DATA_DIR, f))]
         self.num_classes = len(self.people_lables)
 
         # Load the model
@@ -324,7 +329,8 @@ class FaceRecognitionConvNextBaseModel:
         model.load_weights(os.path.join(MODEL_DIR, "convnextbase_model.keras"))
 
         # Load the face detector
-        modelFile = os.path.join(MODEL_DIR, "res10_300x300_ssd_iter_140000_fp16.caffemodel")
+        modelFile = os.path.join(
+            MODEL_DIR, "res10_300x300_ssd_iter_140000_fp16.caffemodel")
         configFile = os.path.join(MODEL_DIR, "deploy.prototxt")
         net = cv2.dnn.readNetFromCaffe(configFile, modelFile)
         net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
@@ -370,7 +376,8 @@ class FaceRecognitionConvNextBaseModel:
                         color = GREEN
 
                     cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-                    cv2.putText(frame, "Face #{} - {:.2f}%".format(name, confidence*100), (x1 - 10, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, FONT_SCALE, color, 1)
+                    cv2.putText(frame, "Face #{} - {:.2f}%".format(name, confidence*100),
+                                (x1 - 10, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, FONT_SCALE, color, 1)
 
             # display the resulting frame
             cv2.imshow("Face detector - to quit press ESC", frame)

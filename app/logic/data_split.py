@@ -6,12 +6,12 @@ import splitfolders
 from IPython.display import display
 
 # import constants
-from deeplearning.constants import *
+from .deeplearning.constants import *
+
 
 class DataSplit:
     def __init__(self):
         pass
-
 
     def center_crop(self, img, percent=0.5):
         """Returns center cropped image
@@ -31,8 +31,7 @@ class DataSplit:
         crop_img = img[mid_y - ch2:mid_y + ch2, mid_x - cw2:mid_x + cw2]
         return crop_img
 
-
-    def crop_image_from_center(self,data_path):
+    def crop_image_from_center(self, data_path):
         """
         Crop image from center and save over the original image
         :param path: path to folder
@@ -45,7 +44,6 @@ class DataSplit:
                 # Save new image in to temp folder
                 cv2.imwrite(os.path.join(data_path, folder, file), cropped_img)
         display("Crop center complete!")
-
 
     def detectFaceOpenCVDnn(self, net, frame):
 
@@ -111,7 +109,7 @@ class DataSplit:
 
         # load face detection model
         modelFile = os.path.join(MODEL_DIR,
-                                "res10_300x300_ssd_iter_140000_fp16.caffemodel")
+                                 "res10_300x300_ssd_iter_140000_fp16.caffemodel")
         configFile = os.path.join(MODEL_DIR, "deploy.prototxt")
         net = cv2.dnn.readNetFromCaffe(configFile, modelFile)
         net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
@@ -123,7 +121,8 @@ class DataSplit:
                 img = cv2.imread(os.path.join(TEMP_DATA_DIR, folder, file))
                 face, bboxes = self.detectFaceOpenCVDnn(net, img)
                 if face is not None:
-                    cv2.imwrite(os.path.join(TEMP_DATA_DIR, folder, file), face)
+                    cv2.imwrite(os.path.join(
+                        TEMP_DATA_DIR, folder, file), face)
                     # # resize the image to image_size
                     # img = cv2.imread(os.path.join(TEMP_DATA_DIR, folder, file))
                     # img = cv2.resize(img, IMAGE_SIZE)
@@ -132,10 +131,10 @@ class DataSplit:
                     os.remove(os.path.join(TEMP_DATA_DIR, folder, file))
 
         splitfolders.ratio(input=TEMP_DATA_DIR,
-                        output=DATA_DIR,
-                        seed=42,
-                        ratio=(0.8, 0.1, 0.1),
-                        group_prefix=None)
+                           output=DATA_DIR,
+                           seed=42,
+                           ratio=(0.8, 0.1, 0.1),
+                           group_prefix=None)
 
         shutil.rmtree(TEMP_DATA_DIR, ignore_errors=True)
 
