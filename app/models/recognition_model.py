@@ -55,19 +55,20 @@ class DLOptions:
 
 
 class RecognitionModel:
-    def __init__(self, type: str, registered_faces: list[str], options: MLOptions | DLOptions):
+    def __init__(self, type: str, registered_faces: list[str], options: MLOptions | DLOptions, ext: str = ML_MODEL_EXT):
         self.type = type
         self.registered_faces = registered_faces
         self.options = options
         self.name = self.get_name()
         self.path = self.get_path()
+        self.ext = ext
 
     def get_name(self):
         name = self.type + '_' + generate_uuid()
         return name
 
     def get_path(self):
-        path = os.path.join(MODEL_DIR, self.name + ML_MODEL_EXT)
+        path = os.path.join(MODEL_DIR, self.name + self.ext)
         return path
 
     @staticmethod

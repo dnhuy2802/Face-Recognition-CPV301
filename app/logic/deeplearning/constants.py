@@ -1,22 +1,27 @@
 import os
+from ...utils.constants import TRAINING_IMAGE_SIZE
 
 # Specify the batch size and image dimensions
-BATCH_SIZE = 32
-EPOCHS = 50
-LRATE = 0.001
-DECAY = LRATE / EPOCHS
-IMG_HEIGHT, IMG_WIDTH = 224, 224
-IMAGE_SIZE = tuple([IMG_HEIGHT, IMG_WIDTH])
+DEFAULT_TRAIN_RATIO = 0.6
+DEFAULT_VALID_RATIO = 0.2
+DEFAULT_TEST_RATIO = 0.2
+DEFAULT_BATCH_SIZE = 32
+DEFAULT_EPOCHS = 50
+DEFAULT_FINE_TUNE = 0
+LEARNING_RATE = 0.001
+DECAY = LEARNING_RATE / DEFAULT_EPOCHS
+IMAGE_SIZE = tuple([TRAINING_IMAGE_SIZE, TRAINING_IMAGE_SIZE])
 MOMENTUM = 0.9
 NUM_CLASSES = int()
 PEOPLE_LABELS = list()
 
 # Set the paths to your dataset
-TRAIN_DATA_DIR = os.path.join(os.getcwd(), "app", "data", "train")
-VALIDATION_DATA_DIR = os.path.join(os.getcwd(), "app", "data", "val")
-TEST_DATA_DIR = os.path.join(os.getcwd(), "app", "data", "test")
+LOGIC_DIR = os.path.join(os.getcwd(), "app", "logic", "deeplearning")
+TRAIN_DATA_DIR = os.path.join(LOGIC_DIR, "temp", "train")
+VALID_DATA_DIR = os.path.join(LOGIC_DIR, "temp", "valid")
+TEST_DATA_DIR = os.path.join(LOGIC_DIR, "temp", "test")
 TEMP_DATA_DIR = os.path.join(os.getcwd(), "app", "temp")
-MODEL_DIR = os.path.join(os.getcwd(), "app", "deeplearning", "model")
+ASSETS_DIR = os.path.join(LOGIC_DIR, "assets")
 RESOURCES_DIR = os.path.join(os.getcwd(), "app", "resources")
 DATA_DIR = os.path.join(os.getcwd(), "app", "data")
 
