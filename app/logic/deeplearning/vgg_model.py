@@ -112,7 +112,7 @@ class VGGModel:
         callbacks = [early_stopping, checkpoint]
 
         # Compile the model
-        model.compile(optimizer=Adam(lr=LRATE, decay=DECAY),
+        model.compile(optimizer=Adam(lr=LRATE),
                       loss='categorical_crossentropy',
                       metrics=['accuracy'])
 
