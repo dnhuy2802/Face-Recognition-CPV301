@@ -1,6 +1,9 @@
 import os
 import cv2 as cv
 import numpy as np
+from keras.optimizers import Adam
+from keras.losses import CategoricalCrossentropy
+from .constants import LEARNING_RATE
 from ...utils.utils import generate_uuid
 from ...utils.constants import IMAGE_EXT, CACHE_DIR
 
@@ -18,3 +21,11 @@ def save_to_temp(img: np.ndarray, face: str, folder_path: str):
 def get_labels():
     return [f for f in os.listdir(
             CACHE_DIR) if os.path.isdir(os.path.join(CACHE_DIR, f))]
+
+
+def get_optimizer():
+    return Adam(learning_rate=LEARNING_RATE)
+
+
+def get_loss():
+    return CategoricalCrossentropy()

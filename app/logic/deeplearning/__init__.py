@@ -72,18 +72,18 @@ class DeepLearningModelWrapper:
 
         # Load and prepare the training data, validation data and test data
         train_generator = train_datagen.flow_from_directory(TRAIN_DATA_DIR,
-                                                            target_size=IMAGE_SIZE,
+                                                            target_size=INPUT_SHAPE[:2],
                                                             batch_size=self.batch_size,
                                                             class_mode='categorical')
 
         validation_generator = validation_datagen.flow_from_directory(
             VALID_DATA_DIR,
-            target_size=IMAGE_SIZE,
+            target_size=INPUT_SHAPE[:2],
             batch_size=self.batch_size,
             class_mode='categorical')
 
         test_generator = test_datagen.flow_from_directory(TEST_DATA_DIR,
-                                                          target_size=IMAGE_SIZE,
+                                                          target_size=INPUT_SHAPE[:2],
                                                           batch_size=self.batch_size,
                                                           class_mode='categorical')
 
@@ -109,12 +109,15 @@ class DeepLearningModelWrapper:
         # Load model
         self.model, callbacks = self.__load_model()
         # Train model
-        self.model.fit(train_generator,
-                       epochs=self.epochs,
-                       validation_data=validation_generator,
-                       callbacks=callbacks)
+        try:
+            self.model.fit(train_generator,
+                           epochs=self.epochs,
+                           validation_data=validation_generator,
+                           callbacks=callbacks)
+            score = self.model.evaluate(test_generator, verbose=1)
+        except:
+            score = [0, 0]
         # Evaluate model
-        score = self.model.evaluate(test_generator, verbose=1)
         print('Test loss:', score[0])
         print('Test accuracy:', score[1])
         # Delete temp folder

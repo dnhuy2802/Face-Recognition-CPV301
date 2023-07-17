@@ -1,10 +1,10 @@
 # Import necessary libraries
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, GlobalAveragePooling2D, Flatten, BatchNormalization
-from keras.optimizers import Adam
 from keras.applications import ConvNeXtBase
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from .constants import *
+from .utils import get_optimizer, get_loss
 
 import warnings
 warnings.simplefilter(action='ignore', category=Warning)
@@ -60,8 +60,8 @@ class ConvNextBaseModel:
         callbacks = [early_stopping, checkpoint]
 
         # Compile the model
-        model.compile(optimizer=Adam(learning_rate=LEARNING_RATE),
-                      loss='categorical_crossentropy',
+        model.compile(optimizer=get_optimizer(),
+                      loss=get_loss(),
                       metrics=['accuracy'])
 
         return model, callbacks

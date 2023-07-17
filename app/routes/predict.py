@@ -5,7 +5,7 @@ from ..logic.utils.split_image import split_img
 from ..models.response import ResponseObject, FaceResponseObject
 from ..models.recognition_model import RecognizedModel
 from ..logic.model_table import ModelTable
-from ..utils.utils import convert_base64_to_image, convert_to_gray
+from ..utils.utils import convert_base64_to_image
 
 
 ### Create Blueprint ###
