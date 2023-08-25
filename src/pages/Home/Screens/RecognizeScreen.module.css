@@ -1,0 +1,20 @@
+.select {
+    width: 100%;
+}
+
+.container {
+    height: 32rem;
+    position: relative;
+}
+
+.canvasContainer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#canvas {
+    height: 100%;
+}

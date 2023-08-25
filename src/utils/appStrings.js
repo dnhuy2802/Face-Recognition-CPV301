@@ -33,4 +33,32 @@ export const appStrings = {
   camera: {
     initCamera: "Initializing Camera...",
   },
+  // Train
+  train: {
+    button: "Start Training",
+    identityTitle: "Face Identity",
+    identityPlaceholder: "Select faces identity",
+    ml: {
+      title: "Machine Learning",
+      algorithmTitle: "Algorithm",
+      algorithmPlaceholder: "Select algorithm",
+    },
+    dl: {
+      title: "Deep Learning",
+      networkTitle: "Network",
+      networkPlaceholder: "Select network",
+      fineTuneTitle: "Fine Tune Layers",
+      batchSizeTitle: "Batch Size",
+    },
+    keywords: {
+      train: "Train",
+      valid: "Valid",
+      test: "Test",
+    },
+    accuracyTitle: "Accuracy",
+  },
+  // Recognize
+  recognize: {
+    selectPlaceholder: "Select a model",
+  },
 };

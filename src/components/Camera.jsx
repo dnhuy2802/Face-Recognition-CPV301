@@ -1,10 +1,11 @@
 import style from "./Camera.module.css";
-import { useEffect, useState, useContext, useRef } from "react";
+import { useEffect, useState, useContext } from "react";
 import { Select } from "antd";
 import Webcam from "react-webcam";
 import { StateContext } from "../contexts/stateContext";
 import { Typography } from "antd";
 import { appStrings } from "../utils/appStrings";
+import { VIDEO_WIDTH, VIDEO_HEIGHT } from "../utils/constants";
 
 function Camera({
   isMirror = true,
@@ -13,12 +14,12 @@ function Camera({
 }) {
   const [devices, setDevices] = useState([]);
   const { store } = useContext(StateContext);
-  const _currentSelectedDevice = store((state) => state.devideId);
-  const _setCurrentSelectedDevice = store((state) => state.setDevideId);
+  const _currentSelectedDevice = store((state) => state.currentCameraId);
+  const _setCurrentSelectedDevice = store((state) => state.setCurrentCameraId);
 
   const videoConstraints = {
-    width: 1280,
-    height: 720,
+    width: VIDEO_WIDTH,
+    height: VIDEO_HEIGHT,
     facingMode: "user",
     deviceId: _currentSelectedDevice,
   };
@@ -35,7 +36,7 @@ function Camera({
       );
       setDevices(_videoDevices);
       /// If selected is null, set the first device as selected
-      if (!_currentSelectedDevice && _videoDevices.length > 0) {
+      if (_currentSelectedDevice == null && _videoDevices.length > 0) {
         _setCurrentSelectedDevice(_videoDevices[0].deviceId);
       }
     });
@@ -43,13 +44,16 @@ function Camera({
 
   return (
     <div className={style.container}>
-      {_currentSelectedDevice ? (
+      {_currentSelectedDevice != null ? (
         <Webcam
           className={style.camera}
           audio={false}
           mirrored={isMirror}
           videoConstraints={videoConstraints}
           screenshotFormat="image/jpeg"
+          width={VIDEO_WIDTH}
+          height={VIDEO_HEIGHT}
+          forceScreenshotSourceSize={true}
         >
           {mediaCallback}
         </Webcam>

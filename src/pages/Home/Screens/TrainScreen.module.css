@@ -1,0 +1,28 @@
+.optionLabel {
+    width: 100%;
+    height: 100%;
+    padding: 1rem 6rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.trainButton {
+    width: 100%;
+    height: 3rem;
+}
+
+.optionContainer {
+    width: 100%;
+    background-color:var(--color-white);
+    border-radius: 0.5rem;
+    border: 1px dashed var(--color-primary);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.inputNumber {
+    width: 100%;
+}
