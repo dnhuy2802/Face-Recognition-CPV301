@@ -23,7 +23,6 @@ class DeepLearningModelWrapper:
                  valid_percent: int = DEFAULT_VALID_RATIO,
                  test_percent: int = DEFAULT_TEST_RATIO,
                  batch_size: int = DEFAULT_BATCH_SIZE,
-                 epochs: int = DEFAULT_EPOCHS,
                  fine_tune: int = DEFAULT_FINE_TUNE):
         self.registered_faces = registered_faces
         self.save_path = save_path
@@ -32,8 +31,8 @@ class DeepLearningModelWrapper:
         self.valid_percent = valid_percent
         self.test_percent = test_percent
         self.batch_size = batch_size
-        self.epochs = epochs
         self.fine_tune = fine_tune
+        self.epochs = DEFAULT_EPOCHS
         self.model: Sequential = None
         self.labels = get_labels()
 
@@ -54,16 +53,17 @@ class DeepLearningModelWrapper:
 
     def __data_generator(self):
         # Data augmentation for training set, validation set and test set
-        train_datagen = ImageDataGenerator(preprocessing_function=preprocess_input,
-                                           rotation_range=20,
-                                           width_shift_range=0.2,
-                                           height_shift_range=0.2,
-                                           brightness_range=(0.7, 1),
-                                           shear_range=0.2,
-                                           zoom_range=0.2,
-                                           horizontal_flip=True,
-                                           vertical_flip=False,
-                                           fill_mode='nearest')
+        train_datagen = ImageDataGenerator(
+            preprocessing_function=preprocess_input,
+            rotation_range=20,
+            width_shift_range=0.2,
+            height_shift_range=0.2,
+            brightness_range=(0.7, 1),
+            shear_range=0.2,
+            zoom_range=0.2,
+            horizontal_flip=True,
+            vertical_flip=False,
+            fill_mode='nearest')
 
         validation_datagen = ImageDataGenerator(
             preprocessing_function=preprocess_input)
@@ -71,10 +71,11 @@ class DeepLearningModelWrapper:
             preprocessing_function=preprocess_input)
 
         # Load and prepare the training data, validation data and test data
-        train_generator = train_datagen.flow_from_directory(TRAIN_DATA_DIR,
-                                                            target_size=INPUT_SHAPE[:2],
-                                                            batch_size=self.batch_size,
-                                                            class_mode='categorical')
+        train_generator = train_datagen.flow_from_directory(
+            TRAIN_DATA_DIR,
+            target_size=INPUT_SHAPE[:2],
+            batch_size=self.batch_size,
+            class_mode='categorical')
 
         validation_generator = validation_datagen.flow_from_directory(
             VALID_DATA_DIR,
@@ -82,10 +83,11 @@ class DeepLearningModelWrapper:
             batch_size=self.batch_size,
             class_mode='categorical')
 
-        test_generator = test_datagen.flow_from_directory(TEST_DATA_DIR,
-                                                          target_size=INPUT_SHAPE[:2],
-                                                          batch_size=self.batch_size,
-                                                          class_mode='categorical')
+        test_generator = test_datagen.flow_from_directory(
+            TEST_DATA_DIR,
+            target_size=INPUT_SHAPE[:2],
+            batch_size=self.batch_size,
+            class_mode='categorical')
 
         return train_generator, validation_generator, test_generator
 
@@ -107,14 +109,14 @@ class DeepLearningModelWrapper:
         # Get data generator
         train_generator, validation_generator, test_generator = self.__data_generator()
         # Load model
-        self.model, callbacks = self.__load_model()
+        model, callbacks = self.__load_model()
         # Train model
         try:
-            self.model.fit(train_generator,
-                           epochs=self.epochs,
-                           validation_data=validation_generator,
-                           callbacks=callbacks)
-            score = self.model.evaluate(test_generator, verbose=1)
+            model.fit(train_generator,
+                      epochs=self.epochs,
+                      validation_data=validation_generator,
+                      callbacks=callbacks)
+            score = model.evaluate(test_generator, verbose=1)
         except:
             score = [0, 0]
         # Evaluate model
@@ -126,6 +128,7 @@ class DeepLearningModelWrapper:
             shutil.rmtree(os.path.join(VALID_DATA_DIR, face))
             shutil.rmtree(os.path.join(TEST_DATA_DIR, face))
         # Return score
+        self.model = model
         return score[1]
 
     def predict(self, face: np.ndarray):

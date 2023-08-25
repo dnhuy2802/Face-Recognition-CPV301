@@ -19,7 +19,6 @@ LOGIC_DIR = os.path.join(os.getcwd(), "app", "logic", "deeplearning")
 TRAIN_DATA_DIR = os.path.join(LOGIC_DIR, "temp", "train")
 VALID_DATA_DIR = os.path.join(LOGIC_DIR, "temp", "valid")
 TEST_DATA_DIR = os.path.join(LOGIC_DIR, "temp", "test")
-TEMP_DATA_DIR = os.path.join(os.getcwd(), "app", "temp")
 ASSETS_DIR = os.path.join(LOGIC_DIR, "assets")
 
 # Text Variables

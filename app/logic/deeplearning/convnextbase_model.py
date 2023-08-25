@@ -14,8 +14,6 @@ class ConvNextBaseModel:
     def __init__(self, registered_faces: list[str], save_path: str, batch_size: int = DEFAULT_BATCH_SIZE, epochs: int = DEFAULT_EPOCHS, fine_tune: int = DEFAULT_FINE_TUNE):
         self.people_lables = registered_faces
         self.save_path = save_path
-        self.num_classes = int()
-        self.num_train_samples = int()
         self.batch_size = batch_size
         self.epochs = epochs
         self.fine_tune = fine_tune
@@ -23,6 +21,7 @@ class ConvNextBaseModel:
     def model_create(self):
         model_base = ConvNeXtBase(weights='imagenet',
                                   include_top=False,
+                                  pooling='avg',
                                   input_shape=INPUT_SHAPE)
 
         # Freeze the weights of the pre-trained layers

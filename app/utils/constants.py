@@ -9,7 +9,7 @@ MODEL_DIR = os.path.join(os.getcwd(), 'app', 'resources', 'model')
 
 # Models
 ML_MODEL_EXT = '.pkl'
-DL_MODEL_EXT = '.keras'
+DL_MODEL_EXT = '.h5'
 
 # Image Constants
 IMAGE_EXT = '.jpg'
